@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basic Custom Player with Deezer JavaScript SDK</title>
+    <link rel="stylesheet" href="css/index.css" />
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.4.0/gridstack.css"/>                                                                               
+
+    <!-- Loading the Deezer SDK -->
+	<script type="text/javascript" src="http://cdn-files.deezer.com/js/min/dz.js"></script>
+<!-- OR -->
+<!--<script type="text/javascript" src="https://cdns-files.deezer.com/js/min/dz.js"></script>  -->
+
+    <!-- Custom Scripts -->
+    <script type="text/javascript" src="lib/tools.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+    
+</head>
+
+
+<body>
+<div id ="imgbuttonDessus">
+<img id="background" src="/assets/background.png" width="100%" height="100%">
+<input id="reponse1" class="btn btn-secondary" type="button" onclick="checkGoodAnswer(this);" style="visibility:hidden" value="1"/> 
+<input id="reponse2" class="btn btn-secondary" type="button" onclick="checkGoodAnswer(this);" style="visibility:hidden" value="2"/> 
+<input id="reponse3" class="btn btn-secondary type="button" onclick="checkGoodAnswer(this);" style="visibility:hidden" value="3"/> 
+<input id="reponse4" class="btn btn-secondary" type="button" onclick="checkGoodAnswer(this);" style="visibility:hidden" value="4"/> 
+<img id="win" src="/assets/win.png" style="visibility:hidden"/> 
+<img id="chat" src="/assets/chat.png" /> 
+<img id="fail" src="/assets/fail.png" style="visibility:hidden"/> 
+<input id="login" class="btn btn-primary" type="button" onclick="login();" value="Login" />
+<button id="launch" class="btn btn-success" onclick="game_loop()">Lancer le blind test</button>
+
+<div>
+
+
+     <div id="dz-root"></div>
+     <div id="player" style="width:100%;">
+    <script>
+        DZ.init({
+            appId: '328042',
+            channelUrl: 'http://localhost:8080/',
+            player: {
+                onload: function () { 
+                    //configure the player with a set of tracks
+                    //autoplay set to false
+                    //DZ.player.playAlbum(2962681, false);
+                    DZ.player.setShuffle(true);
+                    DZ.player.playPlaylist(3272614282);
+                    //DZ.player.playTracks(['68973465']);
+                }
+            }
+        });
+    console.log(DZ.log);
+
+    var player_1 = [];
+    var player_2 = [];
+    var song;
+    var first_time = true;
+
+
+
+    function initBlindTest () {
+        player_1[0] = false;
+        player_1[1] = "Benjamin";
+        player_1[2] = 0;
+        player_2[0] = false;
+        player_2[1] = "Bobby";
+        player_2[2] = 0;
+    }
+    
+    var score = 0;
+    var songWasPlayed = true;
+
+    function checkGoodAnswer(btn) {
+        song_tab = song.split("-");
+        btn_tab = btn.value.split("-");
+        console.log(song_tab);
+        console.log(btn_tab);
+        
+        if (song_tab[0] == btn_tab[0] && song_tab[1] == btn_tab[1])
+            document.getElementById('win').style.visibility = 'visible';
+        else
+            document.getElementById('fail').style.visibility = 'visible';
+
+    }
+
+    function removeAnswers() {
+        document.getElementById('reponse1').style.visibility = 'hidden'
+        document.getElementById('reponse2').style.visibility = 'hidden'
+        document.getElementById('reponse3').style.visibility = 'hidden'
+        document.getElementById('reponse4').style.visibility = 'hidden'
+    }
+
+    function printAnswers() {
+        document.getElementById('reponse1').style.visibility = 'visible'
+        document.getElementById('reponse2').style.visibility = 'visible'
+        document.getElementById('reponse3').style.visibility = 'visible'
+        document.getElementById('reponse4').style.visibility = 'visible'
+    }
+
+    function winFunction() {
+        if (player_1[2] == 1000) {
+            songWasPlayed = false;
+            console.log("player_1 gagne");
+        }       
+        if (player_2[2] == 1000) {
+            songWasPlayed = false;
+            console.log("player_2 gagne");
+        }
+    }
+
+    function getCurrentSong() {
+        song = DZ.player.getCurrentTrack();
+        song = song.artist.name + '-' + song.title;
+        console.log(song);
+        return song;
+    }
+    
+    function getRandomInt(max) {
+     return Math.floor(Math.random() * Math.floor(max));
+    }
+
+    function getRandomSongs(random_songs, song) {
+        var tab = DZ.player.getTrackList();
+        rdm1 = getRandomInt(tab.length);
+        rdm2 = getRandomInt(tab.length);
+        rdm3 = getRandomInt(tab.length);
+        rdm4 = getRandomInt(tab.length);
+        var goodAnswer = getRandomInt(4); 
+        random_songs[0] =  tab[rdm1].artist.name + '-' + tab[rdm1].title;
+        random_songs[1] =  tab[rdm2].artist.name + '-' + tab[rdm2].title;
+        random_songs[2] =  tab[rdm3].artist.name + '-' + tab[rdm3].title;
+        random_songs[3] =  tab[rdm4].artist.name + '-' + tab[rdm4].title;
+        random_songs[goodAnswer] = song;
+        console.log("good answer -> " + random_songs[goodAnswer]);
+        document.getElementById('reponse1').value = random_songs[0];
+        document.getElementById('reponse2').value = random_songs[1];
+        document.getElementById('reponse3').value = random_songs[2];
+        document.getElementById('reponse4').value = random_songs[3];
+        console.log(random_songs);
+        return(random_songs, song);
+    }
+
+    function game_loop() {
+        removeAnswers();
+        if (songWasPlayed == true) { 
+            if (first_time == true) {
+                DZ.player.next();
+                setTimeout(function(){
+                    DZ.player.seek(20);
+                }, 1000);
+                setTimeout(function(){
+                    startChrono();
+                }, 1000);
+            }
+        }
+    }
+
+
+    function startChrono() {
+        var random_songs = [];    
+        song = getCurrentSong();
+        random_songs, song = getRandomSongs(random_songs, song);        
+        printAnswers();
+        setTimeout(function(){
+            stopChrono();
+        }, 15000);
+    }
+
+    function stopChrono() {        
+        setTimeout(function(){
+            winFunction();
+            document.getElementById('fail').style.visibility = 'hidden';
+            document.getElementById('win').style.visibility = 'hidden';
+            //updateScore();
+            game_loop();
+        }, 3000);
+    }
+
+    </script>
+    </div>
+      
+    
+
+    
+   
+
+</body>
+</html>
